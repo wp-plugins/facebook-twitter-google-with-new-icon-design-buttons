@@ -11,6 +11,7 @@ NEW ICON DESIGN.
 
 Puts Facebook Like and Share,Twitter,Google +1,Google buzz buttons of your choice above or below your posts.
 Easy customization of active buttons and position in the Settings menu.
+More info http://ukras.info/facebook-like-and-share-twitter-google-1/
 
 
 
@@ -24,6 +25,8 @@ Easy customization of active buttons and position in the Settings menu.
  
 
 == Screenshots ==
+
+http://ukras.info/facebook-like-and-share-twitter-google-1/
 
 
 

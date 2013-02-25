@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Social share-Facebook Like and Share , Twitter , Google  buttons
-Plugin URI:
+Plugin URI:   http://ukras.info/facebook-like-and-share-twitter-google-1/
 Description: Puts Facebook Like and Share,Twitter,Google +1,Google buzz share buttons of your choice above or below your posts.
 Author: serverdeath3
 Version: 1.0
-Author URI:
+Author URI: http://ukras.info/
 */
     // New share
 /*
@@ -22,97 +22,92 @@ Author URI:
 
 // ACTION AND FILTERS
 
-add_action('init', 'bos_2_inite');
+add_action('init', 'kur_mur');
 
-add_filter('the_content', 'bos_2_cont');
+add_filter('the_content', 'kur_melik');
 
-add_filter('the_excerpt', 'bos_2_excer');
+add_filter('the_excerpt', 'kur_sool');
 
-add_filter('plugin_action_links', 'bos_3_link', 10, 2 );
+add_filter('plugin_action_links', 'kur_soolin_look', 10, 2 );
 
-add_action('admin_menu', 'bos_3_menu');
+add_action('admin_menu', 'kur_soolin_menu');
 
-add_shortcode( 'bos_3', 'bos_3_short' );
+add_shortcode( 'kon_tergos', 'kur_soolin_short' );
 
-// PUBLIC FUNCTIONS
 
-function bos_2_inite() {
+function kur_mur() {
 	// DISABLED IN THE ADMIN PAGES
 	if (is_admin()) {
 		return;
 	}
 
-	//GET ARRAY OF STORED VALUES
-	$option = bos_3_get_options_stored();
+	$option = kon_tergos_get_options_stored();
 
 	if ($option['active_buttons']['facebook']==true) {
-		wp_enqueue_script('bos_3_facebook', 'http://static.ak.fbcdn.net/connect.php/js/FB.Share');
+		wp_enqueue_script('kon_tergos_facebook', 'http://static.ak.fbcdn.net/connect.php/js/FB.Share');
 	}
 	if ($option['active_buttons']['buzz']==true) {
-		wp_enqueue_script('bos_3_buzz', 'http://www.google.com/buzz/api/button.js');
+		wp_enqueue_script('kon_tergos_buzz', 'http://www.google.com/buzz/api/button.js');
 	}
 	if ($option['active_buttons']['google1']==true) {
-		wp_enqueue_script('bos_3_google1', 'http://apis.google.com/js/plusone.js');
+		wp_enqueue_script('kon_tergos_google1', 'http://apis.google.com/js/plusone.js');
 	}
 	if ($option['active_buttons']['twitter']==true) {
-		wp_enqueue_script('bos_3_twitter', 'http://platform.twitter.com/widgets.js');
+		wp_enqueue_script('kon_tergos_twitter', 'http://platform.twitter.com/widgets.js');
 	}
-}    
-
-
-function bos_3_menu() {
-	add_options_page('Share Facebook twitter google', 'Share Facebook twitter google ', 'manage_options', 'bos_3_options', 'bos_3_options');
 }
 
 
-function bos_3_link($links, $file) {
+function kur_soolin_menu() {
+	add_options_page('Facebook twitter google button Options', 'Facebook twitter google button', 'manage_options', 'kon_tergos_options', 'kon_tergos_options');
+}
+
+
+function kur_soolin_look($links, $file) {
 	static $this_plugin;
 	if (!$this_plugin) $this_plugin = plugin_basename(__FILE__);
- 
+
 	if ($file == $this_plugin){
-		$settings_link = '<a href="admin.php?page=bos_3_options">'.__("Settings").'</a>';
+		$settings_link = '<a href="admin.php?page=kon_tergos_options">'.__("Settings").'</a>';
 		array_unshift($links, $settings_link);
 	}
 	return $links;
-} 
-
-
-function bos_2_cont ($content) {
-	return bos_3 ($content, 'the_content');
 }
 
 
-function bos_2_excer ($content) {
-	return bos_3 ($content, 'the_excerpt');
+function kur_melik ($content) {
+	return kon_tergos ($content, 'the_content');
 }
 
 
-function bos_3 ($content, $filter, $link='', $title='') {
+function kur_sool ($content) {
+	return kon_tergos ($content, 'the_excerpt');
+}
+
+
+function kon_tergos ($content, $filter, $link='', $title='') {
 	static $last_execution = '';
 
-	// IF the_excerpt IS EXECUTED AFTER the_content MUST DISCARD ANY CHANGE MADE BY the_content
+
 	if ($filter=='the_excerpt' and $last_execution=='the_content') {
-		// WE TEMPORARILY REMOVE CONTENT FILTERING, THEN CALL THE_EXCERPT
-		remove_filter('the_content', 'bos_2_cont');
+
+		remove_filter('the_content', 'kur_melik');
 		$last_execution = 'the_excerpt';
 		return the_excerpt();
 	}
 	if ($filter=='the_excerpt' and $last_execution=='the_excerpt') {
-		// WE RESTORE THE PREVOIUSLY REMOVED CONTENT FILTERING, FOR FURTHER EXECUTIONS (POSSIBLY NOT INVOLVING 
-		add_filter('the_content', 'bos_2_cont');
+
+		add_filter('the_content', 'kur_melik');
 	}
 
-	// IF THE "DISABLE" CUSTOM FIELD IS FOUND, BLOCK EXECUTION
-	// unless the shortcode was used in which case assume the disable
-	// should be overridden, allowing us to disable general settings for a page
-	// but insert buttons in a particular content area
-	$custom_field_disable = get_post_custom_values('bos_3_disable');
+   /
+	$custom_field_disable = get_post_custom_values('kon_tergos_disable');
 	if ($custom_field_disable[0]=='yes' and $filter!='shortcode') {
 		return $content;
 	}
-	
+
 	//GET ARRAY OF STORED VALUES
-	$option = bos_3_get_options_stored();
+	$option = kon_tergos_get_options_stored();
 
 	if ($filter!='shortcode') {
 		if (is_single()) {
@@ -140,20 +135,20 @@ function bos_3 ($content, $filter, $link='', $title='') {
 		}
 	}
 	$first_shown = false; // NO PADDING FOR THE FIRST BUTTON
-	
-	// IF LINK AND TITLE ARE NOT SET, USE DEFAULT GET_PERMALINK AND GET_THE_TITLE FUNCTIONS
+
+
 	if ($link=='' and $title=='') {
 		$link = get_permalink();
 		$title = get_the_title();
 	}
 
-	$out = '<div style="height:33px; padding-top:2px; padding-bottom:2px; clear:both;" class="bos_3">';
+	$out = '<div style="height:33px; padding-top:2px; padding-bottom:2px; clear:both;" class="kon_tergos">';
 	if ($option['active_buttons']['facebook']==true) {
 		$first_shown = true;
-		
+
 		// REMOVE HTTP:// FROM STRING
 		$facebook_link = (substr($link,0,7)=='http://') ? substr($link,7) : $link;
-		$out .= '<div style="float:left; width:100px;" class="bos_3_facebook"> 
+		$out .= '<div style="float:left; width:100px;" class="kon_tergos_facebook">
 				<a name="fb_share" type="button_count" href="http://www.facebook.com/sharer.php" share_url="'.$facebook_link.'">Share</a>
 			</div>';
 	}
@@ -165,21 +160,21 @@ function bos_3 ($content, $filter, $link='', $title='') {
 		}
 		// OPTION facebook_like_text FILTERING
 		$option_facebook_like_text = ($option['facebook_like_text']=='recommend') ? 'recommend' : 'like';
-		$out .= '<div style="float:left; width:'.$option['facebook_like_width'].'px; '.$padding.'" class="bos_3_facebook_like"> 
+		$out .= '<div style="float:left; width:'.$option['facebook_like_width'].'px; '.$padding.'" class="kon_tergos_facebook_like">
 				<iframe src="http://www.facebook.com/plugins/like.php?href='.urlencode($link).'&amp;layout=button_count&amp;show_faces=false&amp;width='.$option['facebook_like_width'].'&amp;action='.$option_facebook_like_text.'&amp;colorscheme=light&amp;height=27"
 					scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:'.$option['facebook_like_width'].'px; height:27px;" allowTransparency="true"></iframe>
 			</div>';
-		// FACEBOOK LIKE SEND BUTTON CURRENTLY IN FBML MODE - WILL BE MERGED IN THE LIKE BUTTON WHEN FACEBOOK RELEASES IT	
+
 		if ($option['facebook_like_send']) {
 			static $facebook_like_send_script_inserted = false;
 			if (!$facebook_like_send_script_inserted) {
 				$out .= '<script src="http://connect.facebook.net/en_US/all.js#xfbml=1"></script>';
 				$facebook_like_send_script_inserted = true;
 			}
-			$out .= '<div style="float:left; width:50px; padding-left:10px;" class="bos_3_facebook_like_send">
+			$out .= '<div style="float:left; width:50px; padding-left:10px;" class="kon_tergos_facebook_like_send">
 				<fb:send href="'.$link.'" font=""></fb:send>
 				</div>';
-		}	
+		}
 	}
 
 	if ($option['active_buttons']['buzz']==true) {
@@ -188,7 +183,7 @@ function bos_3 ($content, $filter, $link='', $title='') {
 			$first_shown = true;
 			$padding = '';
 		}
-		$out .= '<div style="float:left; '.$padding.'" class="bos_3_buzz"> 
+		$out .= '<div style="float:left; '.$padding.'" class="kon_tergos_buzz">
 				<a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-count"
 					data-url="'.$link.'"></a>
 			</div>';
@@ -203,7 +198,7 @@ function bos_3 ($content, $filter, $link='', $title='') {
 			$padding = '';
 		}
 		$data_count = ($option['google1_count']) ? '' : 'count="false"';
-		$out .= '<div style="float:left; width:'.$option['google1_width'].'px; '.$padding.'" class="bos_3_google1"> 
+		$out .= '<div style="float:left; width:'.$option['google1_width'].'px; '.$padding.'" class="kon_tergos_google1">
 				<g:plusone size="medium" href="'.$link.'" '.$data_count.'></g:plusone>
 			</div>';
 	}
@@ -214,17 +209,18 @@ function bos_3 ($content, $filter, $link='', $title='') {
 			$padding = '';
 		}
 		$data_count = ($option['twitter_count']) ? 'horizontal' : 'none';
-		$out .= '<div style="float:left; width:'.$option['twitter_width'].'px; '.$padding.'" class="bos_3_twitter"> 
+		$out .= '<div style="float:left; width:'.$option['twitter_width'].'px; '.$padding.'" class="kon_tergos_twitter">
 				<a href="http://twitter.com/share" class="twitter-share-button" data-count="'.$data_count.'"
-					data-text="'.$title.stripslashes($option['twitter_text']).'" data-url="'.$link.'">Tweet</a> 
+					data-text="'.$title.stripslashes($option['twitter_text']).'" data-url="'.$link.'">Tweet</a>
 			</div>';
 	}
+$out .= '</div>
+   ';
 
 
 
-	// REMEMBER LAST FILTER EXECUTION TO HANDLE the_excerpt VS the_content
 	$last_execution = $filter;
-	
+
 	if ($filter=='shortcode') {
 		return $out;
 	}
@@ -238,11 +234,11 @@ function bos_3 ($content, $filter, $link='', $title='') {
 	}
 }
 
-function bos_3_options () {
+function kon_tergos_options () {
 
-	$option_name = 'bos_3';
+	$option_name = 'kon_tergos';
 
-   
+	//must check that the user has the required capability
 	if (!current_user_can('manage_options')) {
 		wp_die( __('You do not have sufficient permissions to access this page.') );
 	}
@@ -254,7 +250,7 @@ function bos_3_options () {
 		'google1'=>'Google "+1"',
 		'buzz'=>'Google Buzz',
 
-	);	
+	);
 
 	$show_in = array(
 		'posts'=>'Single posts',
@@ -266,44 +262,44 @@ function bos_3_options () {
 		'authors'=>'Author archives',
 		'search'=>'Search results',
 	);
-	
+
 	$out = '';
-	
-	// See if the user has posted us some information
-	if( isset($_POST['bos_3_position'])) {
+
+
+	if( isset($_POST['kon_tergos_position'])) {
 		$option = array();
 
 		foreach (array_keys($active_buttons) as $item) {
-			$option['active_buttons'][$item] = (isset($_POST['bos_3_active_'.$item]) and $_POST['bos_3_active_'.$item]=='on') ? true : false;
+			$option['active_buttons'][$item] = (isset($_POST['kon_tergos_active_'.$item]) and $_POST['kon_tergos_active_'.$item]=='on') ? true : false;
 		}
 		foreach (array_keys($show_in) as $item) {
-			$option['show_in'][$item] = (isset($_POST['bos_3_show_'.$item]) and $_POST['bos_3_show_'.$item]=='on') ? true : false;
+			$option['show_in'][$item] = (isset($_POST['kon_tergos_show_'.$item]) and $_POST['kon_tergos_show_'.$item]=='on') ? true : false;
 		}
-		$option['position'] = esc_html($_POST['bos_3_position']);
-		$option['facebook_like_width'] = esc_html($_POST['bos_3_facebook_like_width']);
-		$option['facebook_like_text'] = ($_POST['bos_3_facebook_like_text']=='recommend') ? 'recommend' : 'like';
-		$option['facebook_like_send'] = (isset($_POST['bos_3_facebook_like_send']) and $_POST['bos_3_facebook_like_send']=='on') ? true : false;
-		$option['google1_count'] = (isset($_POST['bos_3_google1_count']) and $_POST['bos_3_google1_count']=='on') ? true : false;
-		$option['google1_width'] = esc_html($_POST['bos_3_google1_width']);
-		$option['twitter_count'] = (isset($_POST['bos_3_twitter_count']) and $_POST['bos_3_twitter_count']=='on') ? true : false;
-		$option['twitter_width'] = esc_html($_POST['bos_3_twitter_width']);
-		$option['twitter_text'] = esc_html($_POST['bos_3_twitter_text']);
-		
+		$option['position'] = esc_html($_POST['kon_tergos_position']);
+		$option['facebook_like_width'] = esc_html($_POST['kon_tergos_facebook_like_width']);
+		$option['facebook_like_text'] = ($_POST['kon_tergos_facebook_like_text']=='recommend') ? 'recommend' : 'like';
+		$option['facebook_like_send'] = (isset($_POST['kon_tergos_facebook_like_send']) and $_POST['kon_tergos_facebook_like_send']=='on') ? true : false;
+		$option['google1_count'] = (isset($_POST['kon_tergos_google1_count']) and $_POST['kon_tergos_google1_count']=='on') ? true : false;
+		$option['google1_width'] = esc_html($_POST['kon_tergos_google1_width']);
+		$option['twitter_count'] = (isset($_POST['kon_tergos_twitter_count']) and $_POST['kon_tergos_twitter_count']=='on') ? true : false;
+		$option['twitter_width'] = esc_html($_POST['kon_tergos_twitter_width']);
+		$option['twitter_text'] = esc_html($_POST['kon_tergos_twitter_text']);
+
 		update_option($option_name, $option);
 		// Put a settings updated message on the screen
 		$out .= '<div class="updated"><p><strong>'.__('Settings saved.', 'menu-test' ).'</strong></p></div>';
 	}
-	
+
 	//GET ARRAY OF STORED VALUES
-	$option = bos_3_get_options_stored();
-	
+	$option = kon_tergos_get_options_stored();
+
 	$sel_above = ($option['position']=='above') ? 'selected="selected"' : '';
 	$sel_below = ($option['position']=='below') ? 'selected="selected"' : '';
 	$sel_both  = ($option['position']=='both' ) ? 'selected="selected"' : '';
 
 	$sel_like      = ($option['facebook_like_text']=='like'     ) ? 'selected="selected"' : '';
 	$sel_recommend = ($option['facebook_like_text']=='recommend') ? 'selected="selected"' : '';
-	
+
 	$facebook_like_show_send_button = ($option['facebook_like_send']) ? 'checked="checked"' : '';
 	$google1_count = ($option['google1_count']) ? 'checked="checked"' : '';
 	$twitter_count = ($option['twitter_count']) ? 'checked="checked"' : '';
@@ -312,17 +308,17 @@ function bos_3_options () {
 
 	$out .= '
 	<style>
-	#bos_3_form h3 { cursor: default; }
-	#bos_3_form td { vertical-align:top; padding-bottom:15px; }
+	#kon_tergos_form h3 { cursor: default; }
+	#kon_tergos_form td { vertical-align:top; padding-bottom:15px; }
 	</style>
-	
+
 	<div class="wrap">
 	<h2>'.__( 'Facebook Like and Share,Twitter,Google +1,Google buzz buttons', 'menu-test' ).'</h2>
 	<div id="poststuff" style="padding-top:10px; position:relative;">
 
 	<div style="float:left; width:74%; padding-right:1%;">
 
-		<form id="bos_3_form" name="form1" method="post" action="">
+		<form id="kon_tergos_form" name="form1" method="post" action="">
 
 		<div class="postbox">
 		<h3>'.__("General options", 'menu-test' ).'</h3>
@@ -330,11 +326,11 @@ function bos_3_options () {
 			<table>
 			<tr><td style="width:130px;">'.__("Active share buttons", 'menu-test' ).':</td>
 			<td>';
-		
+
 			foreach ($active_buttons as $name => $text) {
 				$checked = ($option['active_buttons'][$name]) ? 'checked="checked"' : '';
 				$out .= '<div style="width:250px; float:left;">
-						<input type="checkbox" name="bos_3_active_'.$name.'" '.$checked.' /> '
+						<input type="checkbox" name="kon_tergos_active_'.$name.'" '.$checked.' /> '
 						. __($text, 'menu-test' ).' &nbsp;&nbsp;</div>';
 
 			}
@@ -346,14 +342,14 @@ function bos_3_options () {
 			foreach ($show_in as $name => $text) {
 				$checked = ($option['show_in'][$name]) ? 'checked="checked"' : '';
 				$out .= '<div style="width:250px; float:left;">
-						<input type="checkbox" name="bos_3_show_'.$name.'" '.$checked.' /> '
+						<input type="checkbox" name="kon_tergos_show_'.$name.'" '.$checked.' /> '
 						. __($text, 'menu-test' ).' &nbsp;&nbsp;</div>';
 
 			}
 
 			$out .= '</td></tr>
 			<tr><td>'.__("Position", 'menu-test' ).':</td>
-			<td><select name="bos_3_position">
+			<td><select name="kon_tergos_position">
 				<option value="above" '.$sel_above.' > '.__('before the post', 'menu-test' ).'</option>
 				<option value="below" '.$sel_below.' > '.__('after the post', 'menu-test' ).'</option>
 				<option value="both"  '.$sel_both.'  > '.__('before  and after the post', 'menu-test' ).'</option>
@@ -369,19 +365,19 @@ function bos_3_options () {
 			<table>
 			<tr><td>'.__("Button width", 'menu-test' ).':</td>
 			<td>
-				<input type="text" name="bos_3_facebook_like_width" value="'.stripslashes($option['facebook_like_width']).'" size="10"> px<br />
+				<input type="text" name="kon_tergos_facebook_like_width" value="'.stripslashes($option['facebook_like_width']).'" size="10"> px<br />
 				<span class="description">'.__("default: 100", 'menu-test' ).'</span>
 			</td></tr>
 			<tr><td>'.__("Button text", 'menu-test' ).':</td>
 			<td>
-				<select name="bos_3_facebook_like_text">
+				<select name="kon_tergos_facebook_like_text">
 					<option value="like" '.$sel_like.' > '.__('like', 'menu-test' ).'</option>
 					<option value="recommend" '.$sel_recommend.' > '.__('recommend', 'menu-test' ).'</option>
 				</select>
 			</td></tr>
 			<tr><td>'.__("Show Send button", 'menu-test' ).':</td>
 			<td>
-				<input type="checkbox" name="bos_3_facebook_like_send" '.$facebook_like_show_send_button.' />
+				<input type="checkbox" name="kon_tergos_facebook_like_send" '.$facebook_like_show_send_button.' />
 			</td></tr>
 			</table>
 		</div>
@@ -393,35 +389,35 @@ function bos_3_options () {
 			<table>
 			<tr><td>'.__("Button width", 'menu-test' ).':</td>
 			<td>
-				<input type="text" name="bos_3_google1_width" value="'.stripslashes($option['google1_width']).'" size="10"> px<br />
+				<input type="text" name="kon_tergos_google1_width" value="'.stripslashes($option['google1_width']).'" size="10"> px<br />
 				<span class="description">'.__("default: 90", 'menu-test' ).'</span>
 			</td></tr>
 			<tr><td>'.__("Show counter", 'menu-test' ).':</td>
 			<td>
-				<input type="checkbox" name="bos_3_google1_count" '.$google1_count.' />
+				<input type="checkbox" name="kon_tergos_google1_count" '.$google1_count.' />
 			</td></tr>
 			</table>
 		</div>
 		</div>
-	
+
 		<div class="postbox">
 		<h3>'.__("Twitter  options", 'menu-test' ).'</h3>
 		<div class="inside">
 			<table>
 			<tr><td style="width:130px;">'.__("Button width", 'menu-test' ).':</td>
 			<td>
-				<input type="text" name="bos_3_twitter_width" value="'.stripslashes($option['twitter_width']).'" size="10"> px<br />
+				<input type="text" name="kon_tergos_twitter_width" value="'.stripslashes($option['twitter_width']).'" size="10"> px<br />
 				<span class="description">'.__("default: 110", 'menu-test' ).'</span>
 			</td></tr>
 			<tr><td>'.__("Additional text", 'menu-test' ).':</td>
 			<td>
-				<input type="text" name="bos_3_twitter_text" value="'.stripslashes($option['twitter_text']).'" size="25"><br />
+				<input type="text" name="kon_tergos_twitter_text" value="'.stripslashes($option['twitter_text']).'" size="25"><br />
 				<span class="description">'.__("optional text added at the end of every tweet, e.g. ' (via @authorofblogentry)'.
 			   ", 'menu-test' ).'</span>
 			</td></tr>
 			<tr><td>'.__("Show counter", 'menu-test' ).':</td>
 			<td>
-				<input type="checkbox" name="bos_3_twitter_count" '.$twitter_count.' />
+				<input type="checkbox" name="kon_tergos_twitter_count" '.$twitter_count.' />
 			</td></tr>
 			</table>
 		</div>
@@ -434,7 +430,7 @@ function bos_3_options () {
 		</form>
 
 	</div>
-	
+
 
 	</div>
 
@@ -446,36 +442,36 @@ function bos_3_options () {
 
 
 // SHORTCODE FOR ALL ACTIVE BUTTONS
-function bos_3_short ($atts) {
-	return bos_3 ('', 'shortcode');
+function kur_soolin_short ($atts) {
+	return kon_tergos ('', 'shortcode');
 }
 
 
 //FUNCTION AVAILABLE FOR EXTERNAL INCLUDING INSIDE THEMES AND OTHER PLUGINS
-function bos_3_publish ($link='', $title='') {
-	return bos_3 ('', 'shortcode', $link, $title);
+function kon_tergos_publish ($link='', $title='') {
+	return kon_tergos ('', 'shortcode', $link, $title);
 }
 
 
 
 // PRIVATE FUNCTIONS
 
-function bos_3_get_options_stored () {
+function kon_tergos_get_options_stored () {
 	//GET ARRAY OF STORED VALUES
-	$option = get_option('bos_3');
-	 
+	$option = get_option('kon_tergos');
+
 	if ($option===false) {
 		//OPTION NOT IN DATABASE, SO WE INSERT DEFAULT VALUES
-		$option = bos_3_get_options_default();
-		add_option('bos_3', $option);
+		$option = kon_tergos_get_options_default();
+		add_option('kon_tergos', $option);
 	} else if ($option=='above' or $option=='below') {
 		// Versions below 1.2.0 compatibility
-		$option = bos_3_get_options_default($option);
+		$option = kon_tergos_get_options_default($option);
 	} else if(!is_array($option)) {
 		// Versions below 1.2.2 compatibility
 		$option = json_decode($option, true);
 	}
-	
+
 	// Versions below 1.4.1 compatibility
 	if (!isset($option['facebook_like_text'])) {
 		$option['facebook_like_text'] = 'like';
@@ -504,7 +500,7 @@ function bos_3_get_options_stored () {
 	return $option;
 }
 
-function bos_3_get_options_default ($position='above') {
+function kon_tergos_get_options_default ($position='above') {
 	$option = array();
 	$option['active_buttons'] = array('facebook'=>false, 'twitter'=>true,  'buzz'=>false,  'facebook_like'=>true, 'hyves'=>false,  'google1'=>false);
 	$option['position'] = $position;
